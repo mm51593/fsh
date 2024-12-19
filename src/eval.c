@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/wait.h>
 #include "unistd.h"
 
 #define INPUT_BUF_SIZE 20
@@ -31,6 +32,8 @@ void parse_input(char *line, char **input_buf, unsigned *argc) {
 		line_idx++;
 	}
 
+	input_buf[input_buf_idx] = NULL;
+
 	return;
 }
 
@@ -54,7 +57,13 @@ int eval_exit(char **argv) {
 }
 
 int eval_exec(char **argv) {
-	return -1;
+	int pid = fork();
+	if (pid == 0) {
+		execve(argv[0], argv, NULL);
+	}
+
+	wait(NULL);
+	return 0;
 }
 
 int eval(char *line) {
