@@ -1,25 +1,26 @@
 #include "src/repl.h"
+#include "src/eval.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/syslimits.h>
+#include <unistd.h>
 
-#define PROMPT "fsh> "
+#define PROMPT "fsh"
 #define LINE_LENGTH 256
 
 void print_prompt() {
-	printf(PROMPT);	
+	char cwd[PATH_MAX];
+	char prompt[] = PROMPT;
+	getcwd(cwd, PATH_MAX);
+	printf("%s %s > ", prompt, cwd);
 }
 
 void read_line(char *line) {
 	if (fgets(line, LINE_LENGTH, stdin) == NULL) {
 		line[0] = '\0';
 	}
-}
-
-int eval(char *line) {
-	printf("%lu\n", strlen(line));
-	return EXIT_SUCCESS;
 }
 
 void loop() {
