@@ -10,6 +10,8 @@
 #define CMD_CD_STR "cd"
 #define CMD_EXIT_STR "exit"
 
+extern char **environ;
+
 enum command {
 	CMD_CD,
 	CMD_EXIT,
@@ -67,7 +69,7 @@ int spawn_subprocess(char **argv) {
 		return EXIT_FAILURE;
 		break;
 	case 0: 
-		if (execve(argv[0], argv, NULL) != 0) {
+		if (execve(argv[0], argv, environ) != 0) {
 			perror(argv[0]);
 		}
 		exit(EXIT_FAILURE);
