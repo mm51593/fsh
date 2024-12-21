@@ -49,6 +49,9 @@ enum command determine_cmd(char **argv) {
 
 int eval_cd(char **argv) {
 	int retval = chdir(argv[1]);
+	if (retval != 0) {
+		perror(argv[0]);
+	}
 	return retval;
 }
 
@@ -56,14 +59,31 @@ int eval_exit(char **argv) {
 	exit(EXIT_SUCCESS);
 }
 
-int eval_exec(char **argv) {
+int spawn_subprocess(char **argv) {
 	int pid = fork();
-	if (pid == 0) {
-		execve(argv[0], argv, NULL);
+
+	switch (pid) {
+	case -1:
+		return EXIT_FAILURE;
+		break;
+	case 0: 
+		if (execve(argv[0], argv, NULL) != 0) {
+			perror(argv[0]);
+		}
+		exit(EXIT_FAILURE);
 	}
 
-	wait(NULL);
-	return 0;
+	return pid;
+}
+
+int eval_exec(char **argv) {
+	int pid = spawn_subprocess(argv);
+	int status;
+	if (waitpid(pid, &status, 0) == -1) {
+		return EXIT_FAILURE;
+	}
+
+	return WEXITSTATUS(status);
 }
 
 int eval(char *line) {
@@ -84,10 +104,6 @@ int eval(char *line) {
 		retval = eval_exec(argv);
 		break;
         }
-
-	if (retval != 0) {
-		perror(argv[0]);
-	}
 
 	return retval;
 }
