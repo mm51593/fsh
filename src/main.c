@@ -1,6 +1,6 @@
-#include <stdio.h>
+#include "src/repl.h"
 
 int main(void) {
-	printf("Hello world!");
+	loop();
 	return 0;
 }
