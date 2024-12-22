@@ -25,11 +25,13 @@ void read_line(char *line) {
 
 void loop() {
 	char line[LINE_LENGTH];
+	unsigned long line_length;
 
 	do {
 		print_prompt();
 		read_line(line);
+		line_length = strlen(line);
 		eval(line);
 
-	} while(strlen(line) != 0);
+	} while(line_length != 0);
 }
