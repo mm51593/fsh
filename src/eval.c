@@ -30,7 +30,7 @@ void parse_input(char *line, char **input_buf, unsigned *argc) {
 		if ((line_idx == 0 || line[line_idx - 1] == '\0')
 		    && !isspace(line[line_idx])) {
 			input_buf[input_buf_idx++] = line + line_idx;
-			argc++;
+			(*argc)++;
 		} else if (isspace(line[line_idx])) {
 			line[line_idx] = '\0';
 		}
@@ -131,13 +131,16 @@ int eval_exec(char **argv) {
 	return WEXITSTATUS(status);
 }
 
-int eval(char *line) {
-	char *argv[INPUT_BUF_SIZE];
+int eval(char *line_copy) {
 	unsigned argc = 0;
+	char *argv[INPUT_BUF_SIZE];
 
-	parse_input(line, argv, &argc);
+	parse_input(line_copy, argv, &argc);
+	if (argc == 0) {
+		return EXIT_SUCCESS;
+	}
+
 	int retval;
-
 	switch (determine_cmd(argv)) {
         case CMD_CD:
 		retval = eval_cd(argv);
