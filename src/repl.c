@@ -2,7 +2,6 @@
 #include "src/eval.h"
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <sys/syslimits.h>
 #include <unistd.h>
@@ -18,13 +17,20 @@ void print_prompt() {
 }
 
 void read_line(char *line) {
-	if (fgets(line, LINE_LENGTH, stdin) == NULL) {
-		line[0] = '\0';
+	line[0] = '\0';
+	char *buff_ptr = fgets(line, LINE_LENGTH, stdin);
+	if (buff_ptr == NULL) {
+		if (!feof(stdin)) {
+			line[0] = '\n';
+			line[1] = '\0';
+		}
+		printf("\n");
 	}
+	clearerr(stdin);
 }
 
 void loop() {
-	char line[LINE_LENGTH];
+	char line[LINE_LENGTH] = { 0 };
 	unsigned long line_length;
 
 	do {
