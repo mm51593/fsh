@@ -1,10 +1,10 @@
-#include <_string.h>
+#include <string.h>
 #include <stddef.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/syslimits.h>
+#include <linux/limits.h>
 #include <sys/unistd.h>
 #include <sys/wait.h>
 #include "unistd.h"
