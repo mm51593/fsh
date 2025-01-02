@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <sys/syslimits.h>
+#include <linux/limits.h>
 #include <unistd.h>
 
 #define PROMPT "fsh"
