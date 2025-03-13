@@ -1,20 +1,17 @@
-#include <string.h>
+#include "process.h"
+
 #include <stddef.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <linux/limits.h>
 #include <sys/unistd.h>
 #include <sys/wait.h>
-#include "unistd.h"
 
 #define INPUT_BUF_SIZE 20
 #define CMD_CD_STR "cd"
 #define CMD_EXIT_STR "exit"
-#define PATH_SEPARATOR ':'
 
-extern char **environ;
 
 enum command {
 	CMD_CD,
@@ -65,56 +62,16 @@ int eval_exit(char **argv) {
 	exit(EXIT_SUCCESS);
 }
 
-_Bool check_if_exists(const char *name, char *buffer, int buffer_size, int buffer_idx) {
-	buffer[buffer_idx] = '\0';
-	strlcat(buffer, "/", buffer_size);
-	strlcat(buffer, name, buffer_size);
 
-	return access(buffer, F_OK) == 0;
-}
-
-const char *resolve_from_path(const char *name, char *buffer, int buffer_size) {
-	const char *path = getenv("PATH");
-	if (path == NULL) return name;
-
-	int buffer_idx = 0;
-
-	for (int i = 0; path[i] != '\0'; i++) {
-		if (path[i] == PATH_SEPARATOR) {
-			if (check_if_exists(name, buffer, buffer_size, buffer_idx)) {
-				return buffer;
-			}
-			buffer_idx = 0;	
-		} else {
-			buffer[buffer_idx++] = path[i];
-		}
-	}
-
-	return name;
-}
-
-const char *resolve_name(const char *name, char *buffer, int buffer_size) {
-	if (name[0] != '/' && 
-	   (name[0] != '.' || name[1] != '/')) {
-		return resolve_from_path(name, buffer, PATH_MAX);
-	}
-
-	return name;
-}
-
-int spawn_subprocess(char **argv) {
+int spawn_subprocess(char *const *argv) {
 	int pid = fork();
-	char exe_path[PATH_MAX];
 
 	switch (pid) {
 	case -1:
 		return EXIT_FAILURE;
 		break;
 	case 0: 
-		resolve_name(argv[0], exe_path, PATH_MAX);
-		if (execve(exe_path, argv, environ) != 0) {
-			perror(argv[0]);
-		}
+		spawn_process(argv);
 		exit(EXIT_FAILURE);
 	}
 
