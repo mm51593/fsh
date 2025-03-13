@@ -49,7 +49,7 @@ void move_to_new_process_group() {
 	setpgid(getpid(), 0);
 }
 
-void spawn_process(char *const *argv) {
+void init_subprocess(char *const *argv) {
 	char exe_path[PATH_MAX];
 	resolve_name(argv[0], exe_path, PATH_MAX);
 	move_to_new_process_group();

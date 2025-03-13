@@ -71,7 +71,7 @@ int spawn_subprocess(char *const *argv) {
 		return EXIT_FAILURE;
 		break;
 	case 0: 
-		spawn_process(argv);
+		init_subprocess(argv);
 		exit(EXIT_FAILURE);
 	}
 

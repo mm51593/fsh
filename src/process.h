@@ -1,1 +1,1 @@
-void spawn_process(char *const *argv);
+void init_subprocess(char *const *argv);
