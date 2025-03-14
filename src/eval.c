@@ -97,6 +97,8 @@ const char *resolve_name(const char *name, char *buffer, int buffer_size) {
 	if (name[0] != '/' && 
 	   (name[0] != '.' || name[1] != '/')) {
 		return resolve_from_path(name, buffer, PATH_MAX);
+	} else {
+		strcpy(buffer, name);
 	}
 
 	return name;
