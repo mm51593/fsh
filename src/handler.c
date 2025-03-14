@@ -2,7 +2,7 @@
 
 #include <signal.h>
 #include <stdio.h>
-#include <sys/signal.h>
+#include <signal.h>
 #include <stdlib.h>
 
 int set_signal_handler(int signal, void (*handler)(int)) {
