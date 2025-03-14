@@ -1,14 +1,12 @@
 #include "src/process.h"
 #include "src/constants.h"
 
-#include <signal.h>
 #include <string.h>
 #include <stddef.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/signal.h>
 #include <unistd.h>
 #include <sys/wait.h>
 
