@@ -1,11 +1,13 @@
 #include "process.h"
+#include "src/constants.h"
 
+#include <string.h>
 #include <stddef.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/unistd.h>
+#include <unistd.h>
 #include <sys/wait.h>
 
 #define INPUT_BUF_SIZE 20

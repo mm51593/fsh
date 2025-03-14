@@ -1,9 +1,9 @@
 #include "src/repl.h"
 #include "src/eval.h"
+#include "src/constants.h"
 
 #include <stdio.h>
 #include <string.h>
-#include <linux/limits.h>
 #include <unistd.h>
 
 #define PROMPT "fsh"
