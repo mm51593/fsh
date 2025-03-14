@@ -1,8 +1,11 @@
 #include "src/constants.h"
 
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/_types/_pid_t.h>
+#include <sys/signal.h>
 #include <unistd.h>
 
 #define PATH_SEPARATOR ':'
@@ -46,14 +49,32 @@ const char *resolve_name(const char *name, char *buffer, int buffer_size) {
 	return name;
 }
 
-void move_to_new_process_group() {
-	setpgid(getpid(), 0);
+void move_to_new_process_group(pid_t pid) {
+	setpgid(pid, 0);
+}
+
+int wait_subprocess(pid_t pid) {
+	int status;
+	if (waitpid(pid, &status, WUNTRACED) == -1) {
+		return EXIT_FAILURE;
+	}
+	return WEXITSTATUS(status);
+}
+
+void resume_subprocess(pid_t pid) {
+	kill(pid, SIGCONT);
+}
+
+void move_to_fg(pid_t pgid) {
+	tcsetpgrp(STDIN_FILENO, pgid);
 }
 
 void init_subprocess(char *const *argv) {
 	char exe_path[PATH_MAX];
 	resolve_name(argv[0], exe_path, PATH_MAX);
-	move_to_new_process_group();
+	move_to_new_process_group(0);
+	raise(SIGSTOP);
+
 	if (execve(exe_path, argv, environ) != 0) {
 		perror(argv[0]);
 	}

@@ -1,12 +1,14 @@
 #include "src/process.h"
 #include "src/constants.h"
 
+#include <signal.h>
 #include <string.h>
 #include <stddef.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/signal.h>
 #include <unistd.h>
 #include <sys/wait.h>
 
@@ -64,7 +66,6 @@ int eval_exit(char **argv) {
 	exit(EXIT_SUCCESS);
 }
 
-
 int spawn_subprocess(char *const *argv) {
 	int pid = fork();
 
@@ -82,12 +83,17 @@ int spawn_subprocess(char *const *argv) {
 
 int eval_exec(char **argv) {
 	int pid = spawn_subprocess(argv);
-	int status;
-	if (waitpid(pid, &status, 0) == -1) {
-		return EXIT_FAILURE;
-	}
+	int status = wait_subprocess(pid);
 
-	return WEXITSTATUS(status);
+	move_to_new_process_group(pid);
+	int pgid = pid;
+	move_to_fg(pgid);
+
+	resume_subprocess(pid);
+
+	status = wait_subprocess(pid);
+	move_to_fg(getpgid(getpid()));
+	return status;
 }
 
 int eval(char *line_copy) {
