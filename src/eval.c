@@ -13,6 +13,7 @@
 #define INPUT_BUF_SIZE 20
 #define CMD_CD_STR "cd"
 #define CMD_EXIT_STR "exit"
+#define BG_RUN_FLAG "&"
 
 
 enum command {
@@ -21,7 +22,15 @@ enum command {
 	CMD_EXEC
 };
 
-void parse_input(char *line, char **input_buf, unsigned *argc) {
+_Bool check_bg_run_flag(unsigned *argc, char *const *argv) {
+	if (strcmp(argv[*argc - 1], BG_RUN_FLAG) == 0) {
+		(*argc)--;
+		return 1;
+	}
+	return 0;
+}
+
+void parse_input(char *line, char **input_buf, unsigned *argc, _Bool *bg_flag) {
 	size_t line_idx = 0;
 	size_t input_buf_idx = 0;
 	
@@ -36,6 +45,8 @@ void parse_input(char *line, char **input_buf, unsigned *argc) {
 
 		line_idx++;
 	}
+
+	*bg_flag = *argc != 0 && check_bg_run_flag(argc, input_buf);
 
 	input_buf[input_buf_idx] = NULL;
 
@@ -79,26 +90,36 @@ int spawn_subprocess(char *const *argv) {
 	return pid;
 }
 
-int eval_exec(char **argv) {
+void move_self_to_fg() {
+	move_to_fg(getpgid(getpid()));
+}
+
+int eval_exec(char **argv, _Bool should_bg_run) {
 	int pid = spawn_subprocess(argv);
 	int status = wait_subprocess(pid);
 
 	move_to_new_process_group(pid);
 	int pgid = pid;
-	move_to_fg(pgid);
+        if (!should_bg_run) {
+		move_to_fg(pgid);
+        }
 
-	resume_subprocess(pid);
+        resume_subprocess(pid);
 
-	status = wait_subprocess(pid);
-	move_to_fg(getpgid(getpid()));
+	if (!should_bg_run) {
+		status = wait_subprocess(pid);
+	}
+
+	move_self_to_fg();
 	return status;
 }
 
 int eval(char *line_copy) {
 	unsigned argc = 0;
 	char *argv[INPUT_BUF_SIZE];
+	_Bool should_bg_run = 0;
 
-	parse_input(line_copy, argv, &argc);
+	parse_input(line_copy, argv, &argc, &should_bg_run);
 	if (argc == 0) {
 		return EXIT_SUCCESS;
 	}
@@ -112,7 +133,7 @@ int eval(char *line_copy) {
 		retval = eval_exit(argv);
 		break;
         case CMD_EXEC:
-		retval = eval_exec(argv);
+		retval = eval_exec(argv, should_bg_run);
 		break;
         }
 
